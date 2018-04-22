@@ -1,0 +1,31 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+    <changeSet author="crossover" id="1484386901782-1">
+        <createTable tableName="article">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="pk_article"/>
+            </column>
+            <column name="email" type="VARCHAR(255)"/>
+            <column name="title" type="VARCHAR(255)"/>
+            <column name="content" type="LONGTEXT"/>
+            <column name="date" type="datetime"/>
+            <column name="published" type="BIT"/>
+        </createTable>
+        <createTable tableName="comment">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="pk_comment"/>
+            </column>
+            <column name="article_id" type="BIGINT"/>
+            <column name="email" type="VARCHAR(255)"/>
+            <column name="message" type="LONGTEXT"/>
+            <column name="date" type="datetime"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="java" id="insert_article">
+		<insert tableName="article">
+			<column name="email">john@publisher.com</column>
+			<column name="title">How to boil an egg</column>
+			<column name="content">Get a bowl and heat the water to reach boiling point. Put chicken egg for approximately 10 minutes.</column>
+		</insert>
+	</changeSet>
+</databaseChangeLog>
