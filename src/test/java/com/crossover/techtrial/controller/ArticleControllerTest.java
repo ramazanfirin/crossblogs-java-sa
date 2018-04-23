@@ -51,10 +51,6 @@ public class ArticleControllerTest {
   
   @Autowired
   private ArticleRepository articleRepository;
-  
-  
-//  @Autowired
-//  private MappingJackson2HttpMessageConverter jacksonMessageConverter;
 
   @Autowired
   private PageableHandlerMethodArgumentResolver pageableArgumentResolver;
@@ -89,11 +85,8 @@ public class ArticleControllerTest {
   @Before
   public void setup() throws Exception {
 	  MockitoAnnotations.initMocks(this);
-      //UserController agitoAdapterResource = new UserController();
       this.restUseRecordMockMvc = MockMvcBuilders.standaloneSetup(articleController)
-//          .setCustomArgumentResolvers(pageableArgumentResolver)
           .setControllerAdvice(exceptionTranslator)
-//          .setMessageConverters(jacksonMessageConverter)
           .build();
   }
 
@@ -113,23 +106,7 @@ public class ArticleControllerTest {
 	  article = createEntity(em);
   }
   
-  
-//  @Test
-//  public void testArticleShouldBeCreated() throws Exception {
-//    HttpEntity<Object> article = getHttpEntity(
-//        "{\"email\": \"user1@gmail.com\", \"title\": \"hello\" }");
-//    ResponseEntity<Article> resultAsset = template.postForEntity("/articles", article,
-//        Article.class);
-//    Assert.assertNotNull(resultAsset.getBody().getId());
-//  }
 
-  private HttpEntity<Object> getHttpEntity(Object body) {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    return new HttpEntity<Object>(body, headers);
-  }
-  
-  
   @Test
   public void createArticle() throws Exception {
       int databaseSizeBeforeCreate = articleRepository.findAll().size();
@@ -236,7 +213,6 @@ public class ArticleControllerTest {
 	  articleRepository.saveAndFlush(article);
       int databaseSizeBeforeUpdate = articleRepository.findAll().size();
 
-      // Update the city
       Optional<Article> updatedArticle = articleRepository.findById(article.getId());
       updatedArticle.orElseGet(null).setTitle(UPDATED_TITLE);
 
@@ -245,7 +221,6 @@ public class ArticleControllerTest {
           .content(TestUtil.convertObjectToJsonBytes(updatedArticle.get())))
           .andExpect(status().isOk());
 
-      // Validate the City in the database
       List<Article> cityList = articleRepository.findAll();
       assertThat(cityList).hasSize(databaseSizeBeforeUpdate);
       Article testCity = cityList.get(cityList.size() - 1);

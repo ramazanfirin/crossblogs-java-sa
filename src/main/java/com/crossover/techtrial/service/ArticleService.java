@@ -30,5 +30,7 @@ public interface ArticleService {
    * Search Articles Table matching the title and return result with pagination.
    */
   List<Article> search(String title);
+  
+  List<Article> findAll();
 
 }

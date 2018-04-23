@@ -51,9 +51,6 @@ public class CommentControllerTest {
   private TestRestTemplate template;
 
   private MockMvc restUseRecordMockMvc;
-  
-//  @Autowired
-//  private MappingJackson2HttpMessageConverter jacksonMessageConverter;
 
   @Autowired
   private PageableHandlerMethodArgumentResolver pageableArgumentResolver;
@@ -70,10 +67,7 @@ public class CommentControllerTest {
   @Autowired 
   private CommentRepository commentRepository;
     
-//  private Article article;
-  
   private Comment comment;
-  
   
   private static final String DEFAULT_TITLE = "AAAAAAAAAA";
   private static final String UPDATED_TITLE = "BBBBBBBBBB";
@@ -125,24 +119,7 @@ public class CommentControllerTest {
   public void initTest() {
 	  comment = createEntity(em);
   }
-  
-  
-//  @Test
-//  public void testArticleShouldBeCreated() throws Exception {
-//    HttpEntity<Object> article = getHttpEntity(
-//        "{\"email\": \"user1@gmail.com\", \"title\": \"hello\" }");
-//    ResponseEntity<Article> resultAsset = template.postForEntity("/articles", article,
-//        Article.class);
-//    Assert.assertNotNull(resultAsset.getBody().getId());
-//  }
-
-  private HttpEntity<Object> getHttpEntity(Object body) {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    return new HttpEntity<Object>(body, headers);
-  }
-  
-  
+   
   @Test
   public void createComment() throws Exception {
       int databaseSizeBeforeCreate = commentRepository.findAll().size();
