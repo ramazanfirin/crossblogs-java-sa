@@ -2,6 +2,8 @@ package com.crossover.techtrial.controller;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +26,11 @@ public class ArticleController {
   ArticleService articleService;
 
   @PostMapping(path = "articles")
-  public ResponseEntity<Article> createArticle(@RequestBody Article article) {
-    return new ResponseEntity<>(articleService.save(article), HttpStatus.CREATED);
+  public ResponseEntity<Article> createArticle(@Valid @RequestBody Article article) {
+	  if (article.getId() != null) {
+          return ResponseEntity.badRequest().header("ErrorHeader","There is id in request").body(null);
+      }
+	  return new ResponseEntity<>(articleService.save(article), HttpStatus.CREATED);
   }
 
   @GetMapping(path = "articles/{article-id}")
@@ -36,10 +41,13 @@ public class ArticleController {
     return new ResponseEntity<>(HttpStatus.NOT_FOUND);
   }
 
-  @PutMapping(path = "articles/{article-id}")
-  public ResponseEntity<Article> updateArticle(@PathVariable("article-id") Long id,
-      @RequestBody Article article) {
-    return new ResponseEntity<>(articleService.save(article), HttpStatus.OK);
+  @PutMapping(path = "articles")
+  public ResponseEntity<Article> updateArticle(@Valid @RequestBody Article article) {
+	  
+	  if (article.getId() == null) {
+          return ResponseEntity.badRequest().header("ErrorHeader","There is no id in request").body(null);
+      }
+	  return new ResponseEntity<>(articleService.save(article), HttpStatus.OK);
   }
 
   @DeleteMapping(path = "articles/{article-id}")

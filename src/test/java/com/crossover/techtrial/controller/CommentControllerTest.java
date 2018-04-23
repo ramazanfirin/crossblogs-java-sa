@@ -22,6 +22,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.HttpEntity;
@@ -36,22 +37,20 @@ import org.springframework.transaction.annotation.Transactional;
 import com.crossover.techtrial.exceptions.GlobalExceptionHandler;
 import com.crossover.techtrial.exceptions.TestUtil;
 import com.crossover.techtrial.model.Article;
-import com.crossover.techtrial.repository.ArticleRepository;
+import com.crossover.techtrial.model.Comment;
+import com.crossover.techtrial.repository.CommentRepository;
+import com.crossover.techtrial.service.ArticleService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Transactional
-public class ArticleControllerTest {
+public class CommentControllerTest {
 
   @Autowired
   private TestRestTemplate template;
 
   private MockMvc restUseRecordMockMvc;
-  
-  @Autowired
-  private ArticleRepository articleRepository;
-  
   
 //  @Autowired
 //  private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -66,38 +65,34 @@ public class ArticleControllerTest {
   private EntityManager em;
   
   @Autowired 
-  private ArticleController articleController;
+  private CommentController commentController;
+  
+  @Autowired 
+  private CommentRepository commentRepository;
     
-  private Article article;
+//  private Article article;
+  
+  private Comment comment;
+  
   
   private static final String DEFAULT_TITLE = "AAAAAAAAAA";
   private static final String UPDATED_TITLE = "BBBBBBBBBB";
-
   private static final String DEFAULT_EMAIL = "ramzan@adsfai.com";
-  private static final String UPDATED_CLAZZ = "ramzanasdasd@adsfai.com";
-  
   private static final String DEFAULT_CONTENT = "AAAAAAAAAA";
-  private static final String UPDATED_CONTENT = "BBBBBBBBBB";
-  
+  private static final String UPDATED_EMAIL = "bbbb@adsfai.com";
   private static final LocalDateTime DEFAULT_DATE = LocalDateTime.now();
-  private static final LocalDateTime UPDATED_DATE = LocalDateTime.now();
-  
   private static final Boolean DEFAULT_PUBLISHED = Boolean.TRUE;
-  private static final Boolean UPDATED_PUBLISHED = Boolean.FALSE;
   
   
   @Before
   public void setup() throws Exception {
 	  MockitoAnnotations.initMocks(this);
-      //UserController agitoAdapterResource = new UserController();
-      this.restUseRecordMockMvc = MockMvcBuilders.standaloneSetup(articleController)
-//          .setCustomArgumentResolvers(pageableArgumentResolver)
-          .setControllerAdvice(exceptionTranslator)
-//          .setMessageConverters(jacksonMessageConverter)
-          .build();
+      this.restUseRecordMockMvc = MockMvcBuilders.standaloneSetup(commentController)
+         .setControllerAdvice(exceptionTranslator)
+         .build();
   }
 
-  public static Article createEntity(EntityManager em) {
+  public static Article createArticle(EntityManager em) {
 	  Article article = new Article();
       article.setContent(DEFAULT_CONTENT);
 	  article.setDate(DEFAULT_DATE);
@@ -107,10 +102,28 @@ public class ArticleControllerTest {
 	  
 	  return article;
   }
+  
+  public static Comment createEntity(EntityManager em) {
+	  Comment comment = new Comment();
+      comment.setDate(LocalDateTime.now());
+      comment.setEmail(DEFAULT_EMAIL);
+	  comment.setMessage(DEFAULT_CONTENT); 
+	  
+	  Article article = new Article();
+      article.setContent(DEFAULT_CONTENT);
+	  article.setDate(DEFAULT_DATE);
+	  article.setEmail(DEFAULT_EMAIL);
+	  article.setPublished(DEFAULT_PUBLISHED);
+	  article.setTitle(DEFAULT_TITLE);
+	  
+	  comment.setArticle(article);
+	  
+	  return comment;
+  }
 
   @Before
   public void initTest() {
-	  article = createEntity(em);
+	  comment = createEntity(em);
   }
   
   
@@ -131,139 +144,120 @@ public class ArticleControllerTest {
   
   
   @Test
-  public void createArticle() throws Exception {
-      int databaseSizeBeforeCreate = articleRepository.findAll().size();
+  public void createComment() throws Exception {
+      int databaseSizeBeforeCreate = commentRepository.findAll().size();
 
-      restUseRecordMockMvc.perform(post("/articles")
+      restUseRecordMockMvc.perform(post("/comments")
           .contentType(TestUtil.APPLICATION_JSON_UTF8)
-          .content(TestUtil.convertObjectToJsonBytes(article)))
+          .content(TestUtil.convertObjectToJsonBytes(comment)))
           .andExpect(status().isCreated());
 
-      List<Article> articleList = articleRepository.findAll();
-      assertThat(articleList).hasSize(databaseSizeBeforeCreate + 1);
-      Article testArticle = articleList.get(articleList.size() - 1);
-      assertThat(testArticle.getTitle()).isEqualTo(DEFAULT_TITLE);
+      List<Comment> commentList = commentRepository.findAll();
+      assertThat(commentList).hasSize(databaseSizeBeforeCreate + 1);
+      Comment testComment = commentList.get(commentList.size() - 1);
+      assertThat(testComment.getEmail()).isEqualTo(DEFAULT_EMAIL);
   }
   
   @Test
-  public void createArticleExistingId() throws Exception {
-      int databaseSizeBeforeCreate = articleRepository.findAll().size();
-      article.setId(1L);
+  public void createCommentExistingId() throws Exception {
+      int databaseSizeBeforeCreate = commentRepository.findAll().size();
+      comment.setId(1L);
 
-      restUseRecordMockMvc.perform(post("/articles")
+      restUseRecordMockMvc.perform(post("/comments")
           .contentType(TestUtil.APPLICATION_JSON_UTF8)
-          .content(TestUtil.convertObjectToJsonBytes(article)))
+          .content(TestUtil.convertObjectToJsonBytes(comment)))
           .andExpect(status().isBadRequest());
       
-      List<Article> articleList = articleRepository.findAll();
-      assertThat(articleList).hasSize(databaseSizeBeforeCreate);
+      List<Comment> commentList = commentRepository.findAll();
+      assertThat(commentList).hasSize(databaseSizeBeforeCreate);
   }
   
   @Test
-  @Transactional
   public void checkEmailRequired() throws Exception {
-      int databaseSizeBeforeTest = articleRepository.findAll().size();
-      article.setEmail(null);
+      int databaseSizeBeforeTest = commentRepository.findAll().size();
+      comment.setEmail(null);
 
-      restUseRecordMockMvc.perform(post("/articles")
+      restUseRecordMockMvc.perform(post("/comments")
           .contentType(TestUtil.APPLICATION_JSON_UTF8)
-          .content(TestUtil.convertObjectToJsonBytes(article)))
+          .content(TestUtil.convertObjectToJsonBytes(comment)))
           .andExpect(status().isBadRequest());
 
-      List<Article> articleList = articleRepository.findAll();
-      assertThat(articleList).hasSize(databaseSizeBeforeTest);
+      List<Comment> commentList = commentRepository.findAll();
+      assertThat(commentList).hasSize(databaseSizeBeforeTest);
   }
   
-  @Test
-  public void checkTitleLength() throws Exception {
-      int databaseSizeBeforeTest = articleRepository.findAll().size();
-      StringBuffer temp=new StringBuffer();
-      for (int i = 0; i < 150; i++) {
-    	  temp.append(i);
-	}
-      
-      article.setTitle(temp.toString());
-
-      restUseRecordMockMvc.perform(post("/articles")
-          .contentType(TestUtil.APPLICATION_JSON_UTF8)
-          .content(TestUtil.convertObjectToJsonBytes(article)))
-          .andExpect(status().isBadRequest());
-
-      List<Article> articleList = articleRepository.findAll();
-      assertThat(articleList).hasSize(databaseSizeBeforeTest);
-  }
+  
   
   @Test
-  public void checkContentLength() throws Exception {
-      int databaseSizeBeforeTest = articleRepository.findAll().size();
+  public void checkMessageLength() throws Exception {
+      int databaseSizeBeforeTest = commentRepository.findAll().size();
       StringBuffer temp=new StringBuffer();
       for (int i = 0; i < 35000; i++) {
     	  temp.append(i);
 	}
       
-      article.setContent(temp.toString());
+      comment.setMessage(temp.toString());
 
-      restUseRecordMockMvc.perform(post("/articles")
+      restUseRecordMockMvc.perform(post("/comments")
           .contentType(TestUtil.APPLICATION_JSON_UTF8)
-          .content(TestUtil.convertObjectToJsonBytes(article)))
+          .content(TestUtil.convertObjectToJsonBytes(comment)))
           .andExpect(status().isBadRequest());
 
-      List<Article> articleList = articleRepository.findAll();
-      assertThat(articleList).hasSize(databaseSizeBeforeTest);
+      List<Comment> commentList = commentRepository.findAll();
+      assertThat(commentList).hasSize(databaseSizeBeforeTest);
   }
   
   @Test
-  public void getArticle() throws Exception {
+  public void getComment() throws Exception {
 
-	  articleRepository.saveAndFlush(article);
+	  commentRepository.saveAndFlush(comment);
 	  
-	  restUseRecordMockMvc.perform(get("/articles/{article-id}", article.getId()))
+	  restUseRecordMockMvc.perform(get("/comments/{comments-id}", comment.getId()))
           .andExpect(status().isOk())
           .andExpect(content().contentType(TestUtil.APPLICATION_JSON_UTF8))
-          .andExpect(jsonPath("$.id").value(article.getId().intValue()))
-          .andExpect(jsonPath("$.title").value(DEFAULT_TITLE.toString()));
+          .andExpect(jsonPath("$.id").value(comment.getId().intValue()))
+          .andExpect(jsonPath("$.article.email").value(DEFAULT_EMAIL.toString()))
+          .andExpect(jsonPath("$.email").value(DEFAULT_EMAIL.toString()));
   }
   
   @Test
-  public void getNonExistingArticle() throws Exception {
-	  restUseRecordMockMvc.perform(get("/articles/{article-id}", Long.MAX_VALUE))
+  public void getNonExistingComment() throws Exception {
+	  restUseRecordMockMvc.perform(get("/comments/{comments-id}", Long.MAX_VALUE))
           .andExpect(status().isNotFound());
   }
   
   @Test
-  public void updateArticle() throws Exception {
+  public void updateComment() throws Exception {
       
-	  articleRepository.saveAndFlush(article);
-      int databaseSizeBeforeUpdate = articleRepository.findAll().size();
+	  commentRepository.saveAndFlush(comment);
+      int databaseSizeBeforeUpdate = commentRepository.findAll().size();
 
-      // Update the city
-      Optional<Article> updatedArticle = articleRepository.findById(article.getId());
-      updatedArticle.orElseGet(null).setTitle(UPDATED_TITLE);
+      Optional<Comment> updatedComment = commentRepository.findById(comment.getId());
+      updatedComment.orElseGet(null).setEmail(UPDATED_EMAIL);
 
-      restUseRecordMockMvc.perform(put("/articles")
+      restUseRecordMockMvc.perform(put("/comments")
           .contentType(TestUtil.APPLICATION_JSON_UTF8)
-          .content(TestUtil.convertObjectToJsonBytes(updatedArticle.get())))
+          .content(TestUtil.convertObjectToJsonBytes(updatedComment.get())))
           .andExpect(status().isOk());
 
-      // Validate the City in the database
-      List<Article> cityList = articleRepository.findAll();
-      assertThat(cityList).hasSize(databaseSizeBeforeUpdate);
-      Article testCity = cityList.get(cityList.size() - 1);
-      assertThat(testCity.getTitle()).isEqualTo(UPDATED_TITLE);
+      List<Comment> commentList = commentRepository.findAll();
+      assertThat(commentList).hasSize(databaseSizeBeforeUpdate);
+      Comment testComment = commentList.get(commentList.size() - 1);
+      assertThat(testComment.getEmail()).isEqualTo(UPDATED_EMAIL);
   }
   
   @Test
   @Transactional
-  public void deleteArticle() throws Exception {
-      articleRepository.saveAndFlush(article);
-      int databaseSizeBeforeDelete = articleRepository.findAll().size();
+  public void deleteComment() throws Exception {
+      commentRepository.saveAndFlush(comment);
+      int databaseSizeBeforeDelete = commentRepository.findAll().size();
 
-      restUseRecordMockMvc.perform(delete("/articles/{article-id}", article.getId())
+      restUseRecordMockMvc.perform(delete("/comments/{comments-id}", comment.getId())
           .accept(TestUtil.APPLICATION_JSON_UTF8))
           .andExpect(status().isOk());
 
-      List<Article> cityList = articleRepository.findAll();
-      assertThat(cityList).hasSize(databaseSizeBeforeDelete - 1);
+      List<Comment> commentList = commentRepository.findAll();
+      assertThat(commentList).hasSize(databaseSizeBeforeDelete - 1);
   }
   
 }

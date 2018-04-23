@@ -39,6 +39,7 @@ public class Article implements Serializable {
   String email;
 
   @Column(name = "title")
+  @Size(max = 120)
   String title;
 
   @Size(min = 0, max = 32768)

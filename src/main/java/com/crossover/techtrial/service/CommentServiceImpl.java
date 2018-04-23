@@ -27,4 +27,21 @@ public class CommentServiceImpl implements CommentService {
     return commentRepository.save(comment);
   }
 
+  @Override
+  public Comment findById(Long id) {
+	return commentRepository.findById(id).orElse(null);
+  }
+
+  @Override
+  public void delete(Long id) {
+	  commentRepository.deleteById(id);
+  }
+
+@Override
+public Comment findByIdWithRealtions(Long commentId) {
+	return commentRepository.findByIdWithRealtions(commentId);
+}
+
+  
+  
 }

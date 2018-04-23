@@ -3,6 +3,7 @@ package com.crossover.techtrial.model;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -15,7 +16,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "comment")
@@ -35,8 +36,9 @@ public class Comment implements Serializable {
   @Column(name = "email")
   String email;
 
-  @JsonIgnore
-  @ManyToOne
+  //@JsonIgnore
+  //@JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY)
+  @ManyToOne(cascade=CascadeType.PERSIST)
   @JoinColumn(name = "article_id", referencedColumnName = "id")
   Article article;
 
