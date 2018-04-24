@@ -40,6 +40,11 @@ public class ArticleController {
       return new ResponseEntity<>(article, HttpStatus.OK);
     return new ResponseEntity<>(HttpStatus.NOT_FOUND);
   }
+  
+  @GetMapping(path = "articles")
+  public ResponseEntity<List<Article>> getArticleById() {
+      return new ResponseEntity<>(articleService.findAll(), HttpStatus.OK);
+  }
 
   @PutMapping(path = "articles")
   public ResponseEntity<Article> updateArticle(@Valid @RequestBody Article article) {

@@ -1,6 +1,7 @@
 package com.crossover.techtrial.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -228,7 +229,6 @@ public class ArticleControllerTest {
   }
   
   @Test
-  @Transactional
   public void deleteArticle() throws Exception {
       articleRepository.saveAndFlush(article);
       int databaseSizeBeforeDelete = articleRepository.findAll().size();
@@ -239,6 +239,26 @@ public class ArticleControllerTest {
 
       List<Article> cityList = articleRepository.findAll();
       assertThat(cityList).hasSize(databaseSizeBeforeDelete - 1);
+  }
+  
+  @Test
+  public void getAllArticles() throws Exception {
+      articleRepository.saveAndFlush(article);
+      restUseRecordMockMvc.perform(get("/articles/"))
+          .andExpect(status().isOk())
+          .andExpect(content().contentType(TestUtil.APPLICATION_JSON_UTF8))
+          .andExpect(jsonPath("$.[*].id").value(hasItem(article.getId().intValue())))
+          .andExpect(jsonPath("$.[*].title").value(hasItem(DEFAULT_TITLE.toString())));
+  }
+  
+  @Test
+  public void search() throws Exception {
+      articleRepository.saveAndFlush(article);
+      restUseRecordMockMvc.perform(get("/articles/search?text=AAAA"))
+          .andExpect(status().isOk())
+          .andExpect(content().contentType(TestUtil.APPLICATION_JSON_UTF8))
+          .andExpect(jsonPath("$.[*].id").value(hasItem(article.getId().intValue())))
+          .andExpect(jsonPath("$.[*].title").value(hasItem(DEFAULT_TITLE.toString())));
   }
   
 }

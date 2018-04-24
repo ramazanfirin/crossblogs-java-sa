@@ -29,6 +29,13 @@ apply plugin: 'com.github.ksoichiro.console.reporter'
 
 defaultTasks 'bootRun'
 
+tasks.withType(Test) { 
+  testLogging {
+    exceptionFormat "full"
+    events "started", "skipped", "passed", "failed"
+    showStandardStreams true
+  }
+}
 group = 'com.crossover.techtrial'
 version = '0.2.2-SNAPSHOT'
 
